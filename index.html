@@ -829,24 +829,7 @@ function download(filename, content){
 function esc(s){ return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
 
 const MAX_URL_LEN = 1800;        // conservative; browsers choke first
-
-// If your org uses a special host, change this:
-// e.g. "https://outlook.office.com" (M365) or "https://outlook.live.com" (personal)
 const OWA_BASE = "https://outlook.office.com";
-
-
-
-function openOutlookWeb(to, subject, body){
-  // Official OWA compose deeplink
-  const url = `${OWA_BASE}/mail/deeplink/compose?to=${encodeURIComponent(to)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  if (url.length > MAX_URL_LEN) {
-    alert("Email too long for Outlook Web URL. I’ll download CSV; attach it in Outlook.");
-    document.getElementById('export-csv').click();
-    return;
-  }
-  window.open(url, "_blank", "noopener");
-}
-
 const DEFAULT_TO = "mdahl1@globalpartnership.org";
 
 function textBody(st){
@@ -870,26 +853,29 @@ function textBody(st){
   L.push("", "CSV available via Export if needed.");
   return L.join("\n");
 }
-
-// Both buttons use the same plaintext body
-document.getElementById('email-outlook-desktop').onclick = ()=>{
-  const subject = `Campaign Assets – ${state.country?.name||"No country"} (${new Date().toLocaleString()})`;
-  openMailto(DEFAULT_TO, subject, textBody(state));
-};
-document.getElementById('email-outlook-web').onclick = ()=>{
-  const subject = `Campaign Assets – ${state.country?.name||"No country"} (${new Date().toLocaleString()})`;
-  openOutlookWeb(DEFAULT_TO, subject, textBody(state));   // <-- was openMailto
-};
-
 function openMailto(to, subject, body){
   const url = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  if (url.length > MAX_URL_LEN){
-    alert("Too long for mailto:. I’ll download CSV; attach it in Outlook.");
-    document.getElementById('export-csv').click();
-    return;
-  }
+  if (url.length > MAX_URL_LEN){ document.getElementById('export-csv').click(); return; }
   window.location.href = url;
 }
+function openOutlookWeb(to, subject, body){
+  const url = `${OWA_BASE}/mail/deeplink/compose?to=${encodeURIComponent(to)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  if (url.length > MAX_URL_LEN){ document.getElementById('export-csv').click(); return; }
+  window.open(url, "_blank", "noopener");
+}
+
+const subjectLine = ()=>`Campaign Assets – ${state.country?.name||"No country"} (${new Date().toLocaleString()})`;
+
+document.getElementById('email-outlook-desktop').onclick = ()=>{
+  const body = textBody(state);
+  console.log("MAILTO body:\n", body);     // sanity
+  openMailto(DEFAULT_TO, subjectLine(), body);
+};
+document.getElementById('email-outlook-web').onclick = ()=>{
+  const body = textBody(state);
+  console.log("OWA body:\n", body);        // sanity
+  openOutlookWeb(DEFAULT_TO, subjectLine(), body);
+};
 
 
 

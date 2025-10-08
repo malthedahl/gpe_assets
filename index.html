@@ -323,6 +323,8 @@
     <button id="export-json">Export JSON</button>
     <button id="export-csv">Export CSV</button>
     <button id="clear-all">Clear List</button>
+    <button id="email-outlook-desktop">Email (Outlook app)</button>
+    <button id="email-outlook-web">Email (Outlook Web)</button>
     <span class="muted">Local only. No server.</span>
   </footer>
 </main>
@@ -825,6 +827,74 @@ function download(filename, content){
   const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1200);
 }
 function esc(s){ return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+
+const MAX_URL_LEN = 1800;        // conservative; browsers choke first
+const DEFAULT_TO = "mdahl1@globalpartnership.org";
+
+// If your org uses a special host, change this:
+// e.g. "https://outlook.office.com" (M365) or "https://outlook.live.com" (personal)
+const OWA_BASE = "https://outlook.office.com";
+
+function summarizeForEmail(st){
+  const lines = [];
+  lines.push(`Country: ${st.country?.name||""}`);
+  lines.push(`Needs tailored CFI: ${st.country?.needTailored ? "YES" : "NO"}`);
+  const dateOnly = (st.country?.date||"").split("(")[0].trim();
+  const delegation = (st.country?.date||"").match(/\((.*?)\)/)?.[1] || "";
+  if (dateOnly) lines.push(`Date: ${dateOnly}`);
+  if (delegation) lines.push(`Delegation: ${delegation}`);
+  if (getEventFormat()) lines.push(`Event format: ${getEventFormat()}`);
+  const partners = (qPartners.value||"").trim();
+  if (partners) lines.push(`Partners: ${partners.replace(/\s+/g," ").trim()}`);
+  lines.push("");
+  lines.push("Selected assets:");
+  if (!st.selected.length){
+    lines.push("— none —");
+  } else {
+    lines.push("Name | Category | Lang | Qty | Notes");
+    lines.push("-----|----------|------|-----|------");
+    st.selected.forEach(r=>{
+      lines.push(`${r.name} | ${r.category} | ${r.lang} | ${r.qty} | ${r.notes||"—"}`);
+    });
+  }
+  lines.push("");
+  lines.push("Tip: If formatting breaks, attach the exported CSV/JSON.");
+  return lines.join("\n");
+}
+
+function openMailto(to, subject, body){
+  const url = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  if (url.length > MAX_URL_LEN) {
+    alert("Email too long for mailto:. I’ll download CSV; attach it in Outlook.");
+    document.getElementById('export-csv').click();
+    return;
+  }
+  window.location.href = url; // opens desktop Outlook if default
+}
+
+function openOutlookWeb(to, subject, body){
+  // Official OWA compose deeplink
+  const url = `${OWA_BASE}/mail/deeplink/compose?to=${encodeURIComponent(to)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  if (url.length > MAX_URL_LEN) {
+    alert("Email too long for Outlook Web URL. I’ll download CSV; attach it in Outlook.");
+    document.getElementById('export-csv').click();
+    return;
+  }
+  window.open(url, "_blank", "noopener");
+}
+
+document.getElementById('email-outlook-desktop').onclick = ()=>{
+  const subject = `Campaign Assets – ${state.country?.name||"No country"} (${new Date().toLocaleString()})`;
+  const body = summarizeForEmail(state);
+  openMailto(DEFAULT_TO, subject, body);
+};
+
+document.getElementById('email-outlook-web').onclick = ()=>{
+  const subject = `Campaign Assets – ${state.country?.name||"No country"} (${new Date().toLocaleString()})`;
+  const body = summarizeForEmail(state);
+  openOutlookWeb(DEFAULT_TO, subject, body);
+};
+
 </script>
 </body>
 </html>

@@ -325,7 +325,7 @@
     <button id="clear-all">Clear List</button>
     <button id="email-outlook-desktop">Email (Outlook app)</button>
     <button id="email-outlook-web">Email (Outlook Web)</button>
-    <span class="muted">Local only. No server.</span>
+
   </footer>
 </main>
 
@@ -894,6 +894,45 @@ document.getElementById('email-outlook-web').onclick = ()=>{
   const body = summarizeForEmail(state);
   openOutlookWeb(DEFAULT_TO, subject, body);
 };
+
+function textBody(st){
+  const L = [];
+  L.push(`Country: ${st.country?.name||""}`);
+  L.push(`Needs tailored CFI: ${st.country?.needTailored?"YES":"NO"}`);
+  const dateOnly = (st.country?.date||"").split("(")[0].trim();
+  const delegation = st.country?.date?.match(/\((.*?)\)/)?.[1] || "";
+  if (dateOnly) L.push(`Date: ${dateOnly}`);
+  if (delegation) L.push(`Delegation: ${delegation}`);
+  if (getEventFormat()) L.push(`Event format: ${getEventFormat()}`);
+  const partners = (qPartners.value||"").trim(); if (partners) L.push(`Partners: ${partners}`);
+  L.push(""); L.push("Selected assets:");
+  if (!st.selected.length){ L.push("— none —"); }
+  else {
+    st.selected.forEach(r=>{
+      L.push(`• ${r.name}  —  ${r.category}  |  ${r.lang}  |  Qty: ${r.qty}${r.notes?`  |  ${r.notes}`:""}`);
+    });
+  }
+  L.push("", "CSV available via Export if needed.");
+  return L.join("\n");
+}
+
+function openMailto(to, subject, body){
+  const url = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  if (url.length > 1800){
+    alert("Too long for mailto:. I’ll download CSV; attach it in Outlook.");
+    document.getElementById('export-csv').click();
+    return;
+  }
+  window.location.href = url;
+}
+
+document.getElementById('email-outlook-desktop').onclick = ()=>{
+  const subject = `Campaign Assets – ${state.country?.name||"No country"} (${new Date().toLocaleString()})`;
+  openMailto("you@example.com", subject, textBody(state));
+};
+
+
+
 
 </script>
 </body>

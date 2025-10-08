@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Campaign Assets — Country + 5-Row Picker</title>
+<style>
+  :root { 
+    --fg:#18181b; 
+    --muted:#71717a; 
+    --line:#e4e4e7; 
+    --bg:#fafafa; 
+    --accent:#3b82f6; 
+    --soft:#f4f4f5; 
+    --card:#ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { 
+    font:15px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif; 
+    color:var(--fg); 
+    background:var(--bg); 
+    -webkit-font-smoothing: antialiased;
+  }
+  
+  header { 
+    padding:24px 32px; 
+    background:var(--card);
+    border-bottom:1px solid var(--line); 
+    display:flex; 
+    gap:16px; 
+    align-items:center;
+  }
+  header h1 { font-size:20px; font-weight:600; letter-spacing:-0.01em; }
+  
+  main { padding:32px; max-width:1200px; margin:0 auto; }
+
+  /* Catalog */
+  .catalog{
+    padding:16px 32px 0;
+    max-width:1200px; margin:0 auto;
+  }
+  .cat-grid{
+    display:grid; grid-template-columns: repeat(5,1fr);
+    gap:16px;
+  }
+  .cat-col{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px; padding:14px;
+  }
+  .cat-title{
+    font-weight:700; font-size:13px; text-transform:uppercase;
+    letter-spacing:.04em; color:var(--muted); margin-bottom:8px;
+  }
+  .cat-list{ list-style:none; }
+  .cat-list li{ margin-bottom:6px; }
+  .cat-item{
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  }
+  .cat-item a{
+    color:var(--fg); text-decoration:none; font-size:14px;
+    padding:4px 0;
+  }
+  .cat-item a:hover{ text-decoration:underline; }
+  .badge{
+    font-size:11px; color:var(--muted);
+    padding:2px 6px; border:1px solid var(--line); border-radius:999px;
+  }
+  .badge.pod{ border-style:dashed; }
+
+  /* Country section */
+  .country-card, .questionnaire, .picker, .grid { 
+    border:1px solid var(--line); 
+    border-radius:16px; 
+    background:var(--card);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  }
+  .country-card { padding:24px; margin-top:24px; }
+  .country-row { 
+    display:grid; 
+    grid-template-columns: 2fr 1fr; 
+    gap:16px; 
+    align-items:center; 
+  }
+  .country-info { 
+    display:grid; 
+    grid-template-columns: repeat(3, 1fr); 
+    gap:16px; 
+    margin-top:20px; 
+  }
+  .box { 
+    border:1px solid var(--line); 
+    border-radius:12px; 
+    padding:16px; 
+    background:var(--soft); 
+    min-height:80px;
+  }
+  .box h3 { 
+    margin:0 0 8px 0; 
+    font-size:12px; 
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--muted); 
+  }
+  .box-value { color:var(--fg); font-size:14px; line-height:1.4; }
+  
+  details { margin-top:16px; }
+  summary { 
+    cursor:pointer; 
+    color:var(--muted); 
+    font-size:14px;
+    padding:8px 0;
+    user-select: none;
+  }
+  summary:hover { color:var(--fg); }
+
+  /* Picker section */
+  .picker { 
+    margin-top:24px; 
+    padding:20px 24px; 
+  }
+  .row { 
+    display:grid; 
+    grid-template-columns: 1fr 2.5fr 1.3fr 0.8fr auto; 
+    gap:12px; 
+    align-items:center; 
+    padding:16px 0; 
+    border-bottom:1px solid var(--line);
+  }
+  .row:last-child { border-bottom:0; }
+  .row > label { font-weight:600; font-size:14px; color:var(--fg); }
+  
+  select, input, textarea, button { 
+    padding:10px 14px; 
+    border:1px solid var(--line); 
+    border-radius:8px; 
+    background:var(--card); 
+    font:inherit;
+    font-size:14px;
+    transition: all 0.15s ease;
+  }
+  select:hover, input:hover, textarea:hover { border-color:#a1a1aa; }
+  select:focus, input:focus, textarea:focus { 
+    outline:none; 
+    border-color:var(--accent); 
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+  }
+  input[type="number"] { width:100%; }
+  textarea { width:100%; min-height:90px; resize:vertical; }
+  
+  button { 
+    cursor:pointer; 
+    font-weight:500;
+    border:none;
+  }
+  button:hover { transform: translateY(-1px); }
+  button:active { transform: translateY(0); }
+  
+  .primary { 
+    background:var(--accent); 
+    color:#fff; 
+    padding:10px 20px;
+  }
+  .primary:hover { background:#2563eb; }
+  
+  .muted { color:var(--muted); font-size:14px; }
+  .pill { 
+    padding:6px 12px; 
+    border:1px solid var(--line); 
+    border-radius:999px; 
+    font-size:13px; 
+    color:var(--muted); 
+    background:var(--soft);
+    font-weight:500;
+  }
+
+  /* Table */
+  .grid { 
+    margin-top:24px; 
+    overflow:hidden; 
+  }
+  table { width:100%; border-collapse:collapse; }
+  th, td { 
+    padding:14px 16px; 
+    border-bottom:1px solid var(--line); 
+    vertical-align:top; 
+  }
+  th { 
+    text-align:left; 
+    background:var(--soft); 
+    font-weight:600; 
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    color:var(--muted);
+  }
+  td { font-size:14px; }
+  tr:last-child td { border-bottom:0; }
+  .right { text-align:right; }
+  
+  .remove-btn {
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--muted);
+    padding:4px 10px;
+    font-size:18px;
+    line-height:1;
+    border-radius:6px;
+  }
+  .remove-btn:hover { 
+    background:#fee; 
+    border-color:#fca; 
+    color:#dc2626;
+  }
+  
+  footer { 
+    display:flex; 
+    gap:12px; 
+    flex-wrap:wrap; 
+    padding-top:24px; 
+    align-items:center; 
+  }
+  footer button {
+    background:var(--card);
+    border:1px solid var(--line);
+    color:var(--fg);
+    padding:10px 18px;
+  }
+  footer button:hover { background:var(--soft); }
+
+  /* Questionnaire */
+  .questionnaire { margin-top:24px; padding:20px 24px; }
+  .qa-grid { display:grid; grid-template-columns: 1fr; gap:16px; }
+  .qa-field { display:grid; gap:8px; }
+  .qa-label { font-weight:600; font-size:14px; color:var(--fg); }
+  .qa-hint { font-size:12px; color:var(--muted); }
+
+  /* Responsive */
+  @media (max-width:1100px){ .cat-grid{ grid-template-columns: repeat(2,1fr); } }
+  @media (max-width:900px){
+    main { padding:24px 16px; }
+    .country-row { grid-template-columns: 1fr; }
+    .country-info { grid-template-columns: 1fr; }
+    .row { grid-template-columns: 1fr; gap:10px; }
+  }
+  @media (max-width:700px){ .cat-grid{ grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Campaign Assets</h1>
+  <span class="pill" id="count-pill">0 selected</span>
+</header>
+
+<!-- Top catalog -->
+<nav class="catalog" aria-label="Asset catalog">
+  <div class="cat-grid" id="catalog"></div>
+</nav>
+
+<main>
+  <!-- Country section -->
+  <section class="country-card" aria-label="Country planning">
+    <div class="country-row">
+      <select id="country-select" aria-label="Country"></select>
+      <div class="muted" id="country-status"></div>
+    </div>
+    <div class="country-info">
+      <div class="box">
+        <h3>Tailored CFI</h3>
+        <div class="box-value" id="need-cfi">—</div>
+      </div>
+      <div class="box">
+        <h3>Delegation</h3>
+        <div class="box-value" id="delegation-box">—</div>
+      </div>
+      <div class="box">
+        <h3>Date</h3>
+        <div class="box-value" id="date-box">—</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Five fixed rows -->
+  <section class="picker" aria-label="Assets pickers">
+    <div id="rows"></div>
+  </section>
+
+  <!-- Selected list -->
+  <div class="grid" id="table-wrap" hidden>
+    <table aria-label="Selected assets">
+      <thead>
+        <tr>
+          <th style="width:32%">Name</th>
+          <th style="width:16%">Category</th>
+          <th style="width:14%">Language</th>
+          <th style="width:10%" class="right">Qty</th>
+          <th style="width:24%">Notes</th>
+          <th style="width:4%"></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Questionnaire -->
+  <section class="questionnaire" aria-label="Questionnaire">
+    <div class="qa-grid">
+      <div class="qa-field">
+        <label for="q-format" class="qa-label">1) What is the format of the launch event?</label>
+        <textarea id="q-format" placeholder="e.g., Panel, Fireside chat, Press conference…"></textarea>
+      </div>
+
+      <div class="qa-field">
+        <label for="q-partners" class="qa-label">2) Are there partners we should reach out to for comms collaborations?</label>
+        <div class="qa-hint">CSOs, Youth Leaders, Champions — add names, orgs, roles, and any intros we should request.</div>
+        <textarea id="q-partners" placeholder="e.g., Save the Children DK (press), Youth Leader X (speech), Champion Y (quote)…"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <button id="export-json">Export JSON</button>
+    <button id="export-csv">Export CSV</button>
+    <button id="clear-all">Clear List</button>
+    <span class="muted">Local only. No server.</span>
+  </footer>
+</main>
+
+<script>
+/* ========= Country data ========= */
+const COUNTRIES = [
+  c("Australia","Yes",{
+    status:"Drafting",
+    design:"climate, gender, Pacific region",
+    translation:"English",
+    ready:"DCEO visit in early November",
+    focal:"Lissy",
+    team:"DCEO Visit November. Set of pacific ambassadors",
+    launch:"DCEO visit in early November; consider Pacific ambassadors set",
+    date:"4–5 Nov (Charles & Lissy)"
+  }),
+  c("Belgium","No",{
+    design:"",
+    launch:"Moment for a pledge, Global Citizen stage",
+    focal:"Antoine"
+  }),
+  c("Canada","Yes",{
+    status:"Drafting",
+    design:"gender; evidence & efficiency; education for trade & economic development",
+    translation:"English",
+    ready:"mid-fall",
+    focal:"Lissy",
+    launch:"Either September CEO visit or African ambassadors roundtable (potentially Nov)"
+  }),
+  c("Denmark","Yes",{
+    status:"Approved to design",
+    design:"Design meeting held; agreed key elements. Printing fold template",
+    themes:"Africa; evidence & efficiency (value for money); education for trade & economic development; climate/green transition; domestic finance; EU coordination",
+    translation:"English",
+    ready:"8 Oct",
+    focal:"Roberto",
+    launch:"Minister in Seville; willingness for early pledge; EU presidency",
+    date:"10 Oct (Thiam, Roberto, Karen)"
+  }),
+  c("Estonia","No",{
+    themes:"Digitalization; curriculum development; teacher education",
+    translation:"English",
+    focal:"Farid",
+    launch:"No launch"
+  }),
+  c("European Union","Yes",{
+    status:"Drafting",
+    themes:"Africa; Global Gateway",
+    translation:"English",
+    ready:"UNGA",
+    focal:"Sabine",
+    launch:"UNGA"
+  }),
+  c("Finland","Yes",{
+    status:"Review",
+    themes:"Tech4Ed; Inclusive Education; Gender; School Nutrition; climate; peace & security",
+    translation:"English",
+    ready:"Mid-fall (HL Envoy mission)",
+    focal:"Farid",
+    launch:"Special Envoy end of October"
+  }),
+  c("France","Yes",{
+    status:"Approved to design",
+    design:"Design meeting held; max 6 pages; Eiffel Tower motif",
+    themes:"Africa; Francophonie; Girls' education; School meals; Paris as education capital; AFD as largest grant agent; multiplier example Côte d'Ivoire",
+    translation:"French",
+    ready:"30 October",
+    focal:"Antoine",
+    launch:"Launch of CfI at a multi-stakeholders event",
+    date:"30 Oct (Manigat & Antoine & Margarita)"
+  }),
+  c("Germany","Yes",{
+    status:"Approved to design",
+    design:"Design meeting held",
+    themes:"Africa/Sahel; Ukraine; Middle East; Peace & Security; education for economic development; value for money; innovative financing; private sector; girls' education (TBC)",
+    ready:"October mission",
+    focal:"Sabine",
+    launch:"Education moment with First lady/ minister; Bundestag hearing",
+    date:"3 Nov (Laura & Sabine); 5 Nov (education minister online and Karen)"
+  }),
+  c("Ireland","Yes",{
+    themes:"Ireland's own story; global solidarity; gender equality; focus on low-income countries",
+    translation:"English",
+    ready:"October",
+    focal:"Mark",
+    launch:"Launch of CfI with Parliament & CSOs",
+    date:"3–4 Nov (Ruth & Mark & Padraig)"
+  }),
+  c("Italy","Yes",{
+    themes:"Specific partner countries; PSF",
+    ready:"ASAP",
+    focal:"Iacopo",
+    launch:"International day for education",
+    date:"Jan (Laura, Iacopo, Sabine (co-host/ gov))"
+  }),
+  c("Japan","Yes",{
+    status:"Approved to design",
+    design:"Design meeting held — more tweaks needed",
+    themes:"Africa; climate/DRR; school nutrition; technology; innovative finance",
+    translation:"Japanese",
+    ready:"Beg November",
+    focal:"Yukiko",
+    launch:"Launch of the CfI with the Tokyo University",
+    date:"Dec 10 (Padraig & Yukiko)"
+  }),
+  c("Kuwait","Yes",{
+    themes:"Targeting Middle East & Africa",
+    translation:"Arabic",
+    ready:"October",
+    focal:"Samy",
+    launch:"ISDB President + CEO signoff; send CFI to Ministers of Finance mailboxes; then World Social Forum w/ GCC ministers to present CFI"
+  }),
+  c("Luxembourg","No",{
+    focal:"Cora",
+    launch:"No big event — use UNGA with Director-General from ministry"
+  }),
+  c("Netherlands","Yes",{
+    status:"Design",
+    design:"Insert donor-specific results in cone; replace signifier with partner pics; QR of main CFI; D19",
+    themes:"Africa; innovative finance; economic development; self-interest + solidarity/equality arguments; peace & stability",
+    translation:"English",
+    ready:"October",
+    focal:"Mark",
+    launch:"Feature NCFI during mid-November mission (Afrikadaag, 15 Nov) with MT member; youth leader",
+    date:"15 Nov (Cora & youth leader) - at Afrikadaag conference"
+  }),
+  c("Norway","Yes",{
+    status:"Approved to design",
+    design:"Design meeting held — key elements agreed",
+    themes:"Domestic finance; Peace & Security; West Bank & Gaza; education for trade & economic development; ECW/humanitarian nexus; skills/jobs",
+    translation:"English",
+    ready:"28 October",
+    focal:"Roberto",
+    launch:"Event/ character with new government",
+    date:"30 Oct (Laura & Roberto & Sabine)"
+  }),
+  c("Qatar","Yes",{
+    status:"Review",
+    themes:"Innovative finance; OOSC",
+    translation:"Arabic",
+    ready:"October",
+    focal:"Samy",
+    launch:"ISDB President + CEO signoff; send to MoF; World Social Forum w/ GCC ministers"
+  }),
+  c("Republic of Korea","Yes",{
+    status:"Approved to design",
+    ready:"10 December",
+    themes:"Africa; SE-Asia; climate; technology",
+    translation:"Korean",
+    ready2:"December",
+    focal:"Yukiko",
+    launch:"Event with National Assembly (11th); Event with PSF hosted by Hyundai CMK Foundation (12th)",
+    date:"Dec 11–12 (Padraig & Yukiko)"
+  }),
+  c("Saudi Arabia","Yes",{
+    themes:"MENA; Africa; Learn to Earn transition",
+    translation:"Arabic",
+    ready:"October",
+    focal:"Samy",
+    launch:"Mission to Riyadh"
+  }),
+  c("Spain","Yes",{
+    status:"Approved to design",
+    design:"First meeting held",
+    themes:"Africa; Sahel; West Bank & Gaza; innovative financing; peace & security; climate; gender equality",
+    translation:"Spanish",
+    ready:"27 October",
+    focal:"Cora",
+    launch:"Launch of CfI at Congress event",
+    date:"27 Oct (Manigat & Cora & Sabine)"
+  }),
+  c("Sweden","Yes",{
+    status:"Approved to design",
+    themes:"Ukraine; evidence & efficiency; education for trade & economic development; ROI for Sweden; domestic finance",
+    translation:"English",
+    ready:"12 October",
+    focal:"Roberto",
+    launch:"VC in October — no big event planned"
+  }),
+  c("Switzerland","Yes",{
+    status:"Drafting",
+    themes:"EiE; TVET; education & peace; education & climate; complementarity with ECW/IFFEd; innovative finance",
+    translation:"English (+FR/DE; possibly IT)",
+    ready:"UNGA or mid-fall",
+    focal:"Farid",
+    launch:"Bilateral engagements; quiet launch"
+  }),
+  c("United Arab Emirates","Yes",{
+    themes:"MENA; Africa; Peace/Stability; Learn to Earn transition",
+    translation:"Arabic",
+    ready:"October",
+    focal:"Samy",
+    launch:"ISDB President + CEO signoff; send to MoF; World Social Forum w/ GCC ministers"
+  }),
+  c("United Kingdom","Yes",{
+    status:"Approved to design",
+    themes:"Leveraging finance & VFM; soft power & influence",
+    translation:"English",
+    ready:"Early October",
+    focal:"Mark",
+    launch:"Event in London; NCFI targeted at parliamentarians; soft launch at Labour Party Conference",
+    date:"9–10 Dec (Laura, Mark, Hollie)"
+  }),
+  c("United States","Yes",{
+    status:"Drafting",
+    themes:"Education for national security; reducing migration; economic growth; innovative finance",
+    translation:"English",
+    ready:"October",
+    focal:"Lissy",
+    launch:"No formal launch; may invite members of Congress to ambassador/think tank events in DC"
+  })
+];
+
+function c(name, need, extra={}) {
+  return {
+    name,
+    needTailored: (String(need).trim().toUpperCase()==="YES"),
+    launch: extra.launch || "",
+    date: extra.date || "",
+    status: extra.status || "",
+    design: extra.design || "",
+    themes: extra.themes || "",
+    translation: extra.translation || "",
+    ready: extra.ready || extra.ready2 || "",
+    focal: extra.focal || "",
+    team: extra.team || ""
+  };
+}
+
+/* ========= Asset data ========= */
+const CATS = ["Case for Investment","Printed","Banners","Digital Assets","Press"];
+const DATA = {
+  "Case for Investment": [
+    item("Tailored Case for Investment",{pod:true}),
+    item("CFI Summary",{langs:["EN","FR","AR","ES","IT","DE"], pod:true, notes:"DC has EN copies; Pauline can ship"}),
+    item("CFI Factsheet",{pod:true})
+  ],
+  "Printed": [
+    item("Postcard to GPE + CTA",{pod:true}),
+    item("Factsheet: Transforming education with GPE",{
+      href:"https://www.globalpartnership.org/content/transforming-education-gpe"
+    }),
+    item("Factsheet: The Case for Investment 2026–2030",{ href:"" }),
+    item("Factsheet: Education as the foundation for a peaceful future",{
+      href:"https://www.globalpartnership.org/content/factsheet-education-foundation-peaceful-future"
+    }),
+    item("Factsheet: GPE innovative financing for education",{
+      href:"https://www.globalpartnership.org/content/factsheet-gpe-innovative-financing-education"
+    }),
+    item("Factsheet: Technology for education",{
+      href:"https://www.globalpartnership.org/content/factsheet-technology-education"
+    }),
+    item("Factsheet: Key results 2021–2025",{
+      href:"https://www.globalpartnership.org/node/document/download?file=document/file/2025-09-gpe-key-results-2021-2025.pdf"
+    }),
+    item("Factsheet: Supporting education in contexts of fragility and conflict",{
+      href:"https://www.globalpartnership.org/content/factsheet-supporting-countries-affected-fragility-and-conflict"
+    }),
+    item("Factsheet: Confronting climate change through education",{
+      href:"https://www.globalpartnership.org/content/factsheet-confronting-climate-change-through-education"
+    })
+  ],
+  "Banners": [
+    item("Roll-up banner",{langs:["EN","FR"], notes:"EN (set of 3) available in DC/Paris. FR available in Paris.", href:"https://worldbankgroup.sharepoint.com.mcas.ms/teams/GPEFinancingCampaign2026-WBGroup/Shared%20Documents/Forms/AllItems.aspx?csf=1&web=1&e=73VDUu&CID=ed2d98e6%2D3f2a%2D4b25%2Da9b5%2D5d093b04e462&FolderCTID=0x0120007A939FC2FD17254BB775039F422EBDE5&id=%2Fteams%2FGPEFinancingCampaign2026%2DWBGroup%2FShared%20Documents%2FCAMPAIGN%20COMMUNICATIONS%2FREPLENISHMENT%20COMMS%2FBlossom%20Communications%2FUNGA%20Partners%20Moment%20event%2FRoll%20up%20banners%2FPRINT"}),
+    item("Step & Repeat banner",{langs:["EN","FR"], notes:"EN available in DC/Paris. FR available in Paris.", href:"https://worldbankgroup.sharepoint.com.mcas.ms/teams/GPEFinancingCampaign2026-WBGroup/Shared%20Documents/Forms/AllItems.aspx?id=%2Fteams%2FGPEFinancingCampaign2026%2DWBGroup%2FShared%20Documents%2FCAMPAIGN%20COMMUNICATIONS%2FREPLENISHMENT%20COMMS%2FBlossom%20Communications%2FUNGA%20Partners%20Moment%20event%2FRoll%20up%20banners%2F250903%5Fstep%20and%20repeat%5FPRINT%5Fv03%2Epdf&parent=%2Fteams%2FGPEFinancingCampaign2026%2DWBGroup%2FShared%20Documents%2FCAMPAIGN%20COMMUNICATIONS%2FREPLENISHMENT%20COMMS%2FBlossom%20Communications%2FUNGA%20Partners%20Moment%20event%2FRoll%20up%20banners"}),
+    item("Multiply Portrait frame",{langs:["EN","FR"], notes:"7 EN frames + backdrop (DC). 3 FR frames + backdrop (DC)."})
+  ],
+  "Digital Assets": [
+    item("CFI PowerPoint presentation"),
+    item("Campaign branded PowerPoint template",{href: "https://worldbankgroup.sharepoint.com/:p:/r/teams/GPEFinancingCampaign2026-WBGroup/_layouts/15/Doc.aspx?sourcedoc=%7B001A68E1-975A-4A1E-A226-51C808367A9E%7D&file=250908%20GPE%20MP%20PPT%20Template.pptx&action=edit&mobileredirect=true"}),
+    item("Campaign launch video",{langs:["EN","FR","EN (no subs)", "YouTube"]}),
+    item("Malala endorsement video", {href: "https://worldbankgroup.sharepoint.com/teams/GPEFinancingCampaign2026-WBGroup/_layouts/15/stream.aspx?id=%2Fteams%2FGPEFinancingCampaign2026-WBGroup%2FShared%20Documents%2FCAMPAIGN%20COMMUNICATIONS%2FREPLENISHMENT%20COMMS%2FBlossom%20Communications%2FCFI%20launch%20event%2FFinalized%20visual%20assets-%20GPE%20CFI%20launch%20event%2FMalala%20endorsement%20video-%20CFI%20launch%20event%2Emp4"}),
+    item("Video loop slideshow (no audio)"),
+    item("Editable PowerPoint deck with puzzle piece visuals"),
+    item("Campaign hero visual",{langs:["FR","ES","PT","IT","AR"], href:"https://worldbankgroup.sharepoint.com/teams/GPEFinancingCampaign2026-WBGroup/Shared%20Documents/CAMPAIGN%20COMMUNICATIONS/REPLENISHMENT%20COMMS/Blossom%20Communications/Campaign%20brand%20book/Hero%20Visual/EN/GPE%20HV%20L%20en.jpg?csf=1&web=1&e=iah2T7&CID=e21e166e-dfc2-48e1-ad17-441bc95e024f"}),
+    item("Youth statement QR code",{href: "https://worldbankgroup.sharepoint.com.mcas.ms/teams/GPEFinancingCampaign2026-WBGroup/Shared%20Documents/Forms/AllItems.aspx?id=%2Fteams%2FGPEFinancingCampaign2026%2DWBGroup%2FShared%20Documents%2FCAMPAIGN%20COMMUNICATIONS%2FREPLENISHMENT%20COMMS%2FBlossom%20Communications%2FUNGA%20Partners%20Moment%20event%2FQR%20code%20GPE%20Youth%20Statement%20%2Epng&parent=%2Fteams%2FGPEFinancingCampaign2026%2DWBGroup%2FShared%20Documents%2FCAMPAIGN%20COMMUNICATIONS%2FREPLENISHMENT%20COMMS%2FBlossom%20Communications%2FUNGA%20Partners%20Moment%20event"}),
+    item("Event invitation PowerPoint templates", {href:"https://worldbankgroup.sharepoint.com.mcas.ms/teams/GPEFinancingCampaign2026-WBGroup/Shared%20Documents/CAMPAIGN%20COMMUNICATIONS/REPLENISHMENT%20COMMS/Blossom%20Communications/Campaign%20brand%20book/Save%20the%20date%20templates?csf=1&web=1&e=BKuQzP&CID=b2367be2-2eb1-4589-86a2-8afc55819622"}),
+    item("Social media kit"),
+    item("Results stories (text & videos)")
+  ],
+  "Press": [
+    item("Press kits"),
+    item("Press Release"),
+    item("Media outreach"),
+  ]
+};
+
+function item(name, extra = {}) {
+  return {
+    id: crypto.randomUUID(),
+    name,
+    langs: extra.langs || [],
+    pod: !!extra.pod,
+    notes: extra.notes || "",
+    href: extra.href || ""
+  };
+}
+
+
+/* ========= Build top catalog ========= */
+const catHost = document.getElementById("catalog");
+for (const cat of CATS){
+  const col = document.createElement("div");
+  col.className = "cat-col";
+  const title = document.createElement("div");
+  title.className = "cat-title";
+  title.textContent = cat;
+  const ul = document.createElement("ul");
+  ul.className = "cat-list";
+  (DATA[cat]||[]).forEach(it=>{
+    const li=document.createElement("li");
+    const row=document.createElement("div");
+    row.className="cat-item";
+    const a = document.createElement("a");
+    a.textContent = it.name;
+    if (it.href) {
+      a.href = it.href;
+      a.target = "_blank";
+      a.rel = "noopener";
+    } else {
+      a.href = "javascript:void(0)";
+      a.setAttribute("aria-disabled", "true");
+      a.style.opacity = ".7";
+      a.style.pointerEvents = "none";
+      a.title = "Link coming soon";
+    }
+    row.appendChild(a);
+
+    if (it.langs && it.langs.length){
+      const b=document.createElement("span"); b.className="badge"; b.textContent=it.langs.join(" · ");
+      row.appendChild(b);
+    }
+    li.appendChild(row);
+    ul.appendChild(li);
+  });
+  col.appendChild(title);
+  col.appendChild(ul);
+  catHost.appendChild(col);
+}
+
+/* ========= State ========= */
+const state = { selected: [], country: null };
+
+/* ========= Country UI ========= */
+const countrySelect = document.getElementById('country-select');
+const needBox = document.getElementById('need-cfi');
+const delegationBox = document.getElementById('delegation-box');
+const dateBox = document.getElementById('date-box');
+const statusLine = document.getElementById('country-status');
+
+COUNTRIES.sort((a,b)=>a.name.localeCompare(b.name)).forEach(cn=>{
+  const o=document.createElement('option'); o.value=cn.name; o.textContent=cn.name; countrySelect.appendChild(o);
+});
+countrySelect.addEventListener('change', ()=>applyCountry(countrySelect.value));
+if (countrySelect.options.length) applyCountry(countrySelect.options[0].value);
+
+function applyCountry(name){
+  const c = COUNTRIES.find(x=>x.name===name);
+  state.country = c || null;
+  needBox.textContent = c ? (c.needTailored ? "YES" : "NO") : "—";
+  
+  let date = c?.date || "—";
+  let delegation = "—";
+  const match = date.match(/(.*?)\s*\((.*?)\)/);
+  if (match) {
+    date = match[1].trim();
+    delegation = match[2].trim();
+  }
+  
+  dateBox.textContent = date;
+  delegationBox.textContent = delegation;
+
+  statusLine.textContent = c ? (c.focal ? `Focal: ${c.focal}` : "") : "";
+}
+
+/* ========= 5 rows ========= */
+const rowsHost = document.getElementById('rows');
+for (const cat of CATS) rowsHost.appendChild(makeRow(cat, DATA[cat]||[]));
+
+function makeRow(category, items){
+  const wrap = document.createElement('div'); wrap.className='row';
+  const label = document.createElement('label'); label.textContent = category;
+
+  const select = document.createElement('select'); select.setAttribute('aria-label', `${category} item`);
+  items.forEach(a=>{ const o=document.createElement('option'); o.value=a.id; o.textContent=a.name; select.appendChild(o); });
+
+  const lang = document.createElement('select'); lang.setAttribute('aria-label','Language'); lang.disabled = true;
+  const qty = document.createElement('input'); qty.type='number'; qty.min='1'; qty.step='1'; qty.value='1'; qty.setAttribute('aria-label','Quantity');
+
+  const add = document.createElement('button'); add.className='primary'; add.textContent='Add';
+
+  function refreshLang(){
+    const it = items.find(x=>x.id===select.value);
+    const langs = it?.langs||[];
+    lang.innerHTML="";
+    if (langs.length){
+      langs.forEach(L=>{ const o=document.createElement('option'); o.value=L; o.textContent=L; lang.appendChild(o); });
+      lang.disabled=false;
+    } else {
+      const o=document.createElement('option'); o.value=""; o.textContent="N/A"; lang.appendChild(o);
+      lang.disabled=true;
+    }
+  }
+  select.addEventListener('change', refreshLang);
+  if (items.length){ select.value = items[0].id; refreshLang(); }
+
+  add.addEventListener('click', ()=>{
+    const it = items.find(x=>x.id===select.value); if(!it) return;
+    const chosenLang = lang.disabled ? "—" : (lang.value || "—");
+    const quantity = Math.max(1, parseInt(qty.value||"1",10));
+    const key = `${it.name}::${chosenLang}`;
+
+    const row = state.selected.find(r=>`${r.name}::${r.lang}`===key);
+    const notes = [it.pod ? "Printed on demand." : "", it.notes||""].filter(Boolean).join(" ");
+
+    if (row) row.qty += quantity;
+    else state.selected.push({
+      id:crypto.randomUUID(),
+      name:it.name, category, lang:chosenLang, qty:quantity, notes
+    });
+    drawTable();
+  });
+
+  wrap.appendChild(label);
+  wrap.appendChild(select);
+  wrap.appendChild(lang);
+  wrap.appendChild(qty);
+  wrap.appendChild(add);
+  return wrap;
+}
+
+/* ========= Selected table ========= */
+const tbody = document.getElementById('tbody');
+const tableWrap = document.getElementById('table-wrap');
+const countPill = document.getElementById('count-pill');
+
+function drawTable(){
+  tbody.innerHTML="";
+  state.selected.forEach((r,i)=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${esc(r.name)}</strong></td>
+      <td>${esc(r.category)}</td>
+      <td>${esc(r.lang)}</td>
+      <td class="right">${r.qty}</td>
+      <td>${r.notes?esc(r.notes):"—"}</td>
+      <td><button class="remove-btn" aria-label="Remove" onclick="removeRow(${i})">×</button></td>`;
+    tbody.appendChild(tr);
+  });
+  tableWrap.hidden = state.selected.length===0;
+  countPill.textContent = `${state.selected.length} selected`;
+}
+window.removeRow = (i)=>{ state.selected.splice(i,1); drawTable(); };
+
+/* ========= Questionnaire wiring ========= */
+const qFormat = document.getElementById('q-format');
+const qPartners = document.getElementById('q-partners');
+
+function getEventFormat(){
+  return (qFormat.value || "").trim();
+}
+
+/* ========= Export / Clear ========= */
+document.getElementById('export-json').onclick=()=>{
+  const payload = {
+    country: state.country?.name||"",
+    needTailored: state.country?.needTailored||false,
+    eventFormat: getEventFormat(),
+    partners: (qPartners.value||"").trim(),
+    items: state.selected
+  };
+  download('assets.json', JSON.stringify(payload, null, 2));
+};
+
+document.getElementById('export-csv').onclick=()=>download('assets.csv', toCSV(state));
+document.getElementById('clear-all').onclick=()=>{
+  if(state.selected.length && confirm("Clear the entire list?")){
+    state.selected=[]; drawTable();
+  }
+};
+
+function toCSV(st){
+  const head = ["country","needTailored","eventFormat","partners","name","category","lang","qty","notes"];
+  const common = [
+    st.country?.name||"",
+    st.country?.needTailored?"YES":"NO",
+    getEventFormat(),
+    (qPartners.value||"").replace(/\n/g,' ').trim()
+  ];
+  const rows = st.selected.length
+    ? st.selected.map(r=>[...common, r.name, r.category, r.lang, r.qty, r.notes])
+    : [[...common, "", "", "", "", ""]]; // emit one row even if no items
+  const esc=v=>`"${String(v??"").replace(/"/g,'""')}"`;
+  return [head.join(","), ...rows.map(row=>row.map(esc).join(","))].join("\n");
+}
+
+function download(filename, content){
+  const blob=new Blob([content],{type:'text/plain;charset=utf-8'});
+  const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1200);
+}
+function esc(s){ return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+</script>
+</body>
+</html>

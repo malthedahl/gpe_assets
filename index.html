@@ -316,10 +316,9 @@
   </section>
 
   <footer>
-    <button id="clear-all">Clear List</button>
-    <button id="email-outlook-desktop">Email (Outlook app)</button>
-    <button id="email-outlook-web">Email (Outlook Web)</button>
-
+    <button id="clear-all" type="button">Clear List</button>
+    <button id="email-outlook-desktop" type="button">Email (Outlook app)</button>
+    <button id="email-outlook-web" type="button">Email (Outlook Web)</button>
   </footer>
 </main>
 
@@ -781,47 +780,24 @@ function getEventFormat(){
   return (qFormat.value || "").trim();
 }
 
-/* ========= Export / Clear ========= */
-document.getElementById('export-json').onclick=()=>{
-  const payload = {
-    country: state.country?.name||"",
-    needTailored: state.country?.needTailored||false,
-    eventFormat: getEventFormat(),
-    partners: (qPartners.value||"").trim(),
-    items: state.selected
-  };
-  download('assets.json', JSON.stringify(payload, null, 2));
-};
 
-document.getElementById('export-csv').onclick=()=>download('assets.csv', toCSV(state));
-document.getElementById('clear-all').onclick=()=>{
-  if(state.selected.length && confirm("Clear the entire list?")){
-    state.selected=[]; drawTable();
+document.getElementById('clear-all').onclick = () => {
+  if (state.selected.length && confirm("Clear the entire list?")) {
+    state.selected = [];
+    drawTable();
   }
 };
 
-function toCSV(st){
-  const head = ["country","needTailored","eventFormat","partners","name","category","lang","qty","notes"];
-  const common = [
-    st.country?.name||"",
-    st.country?.needTailored?"YES":"NO",
-    getEventFormat(),
-    (qPartners.value||"").replace(/\n/g,' ').trim()
-  ];
-  const rows = st.selected.length
-    ? st.selected.map(r=>[...common, r.name, r.category, r.lang, r.qty, r.notes])
-    : [[...common, "", "", "", "", ""]]; // emit one row even if no items
-  const esc=v=>`"${String(v??"").replace(/"/g,'""')}"`;
-  return [head.join(","), ...rows.map(row=>row.map(esc).join(","))].join("\n");
-}
-
+// === helpers ===
 function download(filename, content){
-  const blob=new Blob([content],{type:'text/plain;charset=utf-8'});
-  const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1200);
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1200);
 }
-function esc(s){ return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
 
-const MAX_URL_LEN = 1800;        // conservative; browsers choke first
+const MAX_URL_LEN = 1800;
 const OWA_BASE = "https://outlook.office.com";
 const DEFAULT_TO = "mdahl1@globalpartnership.org";
 
@@ -833,42 +809,54 @@ function textBody(st){
   const delegation = st.country?.date?.match(/\((.*?)\)/)?.[1] || "";
   if (dateOnly) L.push(`Date: ${dateOnly}`);
   if (delegation) L.push(`Delegation: ${delegation}`);
-  if (getEventFormat()) L.push(`Event format: ${getEventFormat()}`);
-  const partners = (qPartners.value||"").trim(); if (partners) L.push(`Partners: ${partners}`);
+  const extra = (document.getElementById('q-format').value || "").trim();
+  if (extra) L.push(`Comments: ${extra}`);
   L.push("");
   L.push("Selected assets:");
   if (!st.selected.length){ L.push("— none —"); }
   else {
-    st.selected.forEach(r=>{
+    st.selected.forEach(r => {
       L.push(`• ${r.name}  |  ${r.lang}  |  Qty: ${r.qty}`);
     });
   }
   return L.join("\n");
 }
+
 function openMailto(to, subject, body){
   const url = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  if (url.length > MAX_URL_LEN){ document.getElementById('export-csv').click(); return; }
+  if (url.length > MAX_URL_LEN){
+    // Safe fallback: download the body as a .txt and copy to clipboard if possible
+    download('campaign-assets.txt', body);
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(body).catch(()=>{});
+    alert("Email is too long for mailto:. I saved a TXT and copied the body (if allowed). Please paste into Outlook.");
+    return;
+  }
   window.location.href = url;
 }
+
 function openOutlookWeb(to, subject, body){
   const url = `${OWA_BASE}/mail/deeplink/compose?to=${encodeURIComponent(to)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  if (url.length > MAX_URL_LEN){ document.getElementById('export-csv').click(); return; }
+  if (url.length > MAX_URL_LEN){
+    download('campaign-assets.txt', body);
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(body).catch(()=>{});
+    alert("Email is too long for Outlook Web link. I saved a TXT and copied the body (if allowed). Please paste into OWA.");
+    return;
+  }
   window.open(url, "_blank", "noopener");
 }
 
-const subjectLine = ()=>`Campaign Assets – ${state.country?.name||"No country"} (${new Date().toLocaleString()})`;
+const subjectLine = () =>
+  `Campaign Assets – ${state.country?.name||"No country"} (${new Date().toLocaleString()})`;
 
-document.getElementById('email-outlook-desktop').onclick = ()=>{
+document.getElementById('email-outlook-desktop').onclick = () => {
   const body = textBody(state);
-  console.log("MAILTO body:\n", body);     // sanity
   openMailto(DEFAULT_TO, subjectLine(), body);
 };
-document.getElementById('email-outlook-web').onclick = ()=>{
+
+document.getElementById('email-outlook-web').onclick = () => {
   const body = textBody(state);
-  console.log("OWA body:\n", body);        // sanity
   openOutlookWeb(DEFAULT_TO, subjectLine(), body);
 };
-
 
 
 

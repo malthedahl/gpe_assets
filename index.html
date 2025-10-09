@@ -307,21 +307,15 @@
   <section class="questionnaire" aria-label="Questionnaire">
     <div class="qa-grid">
       <div class="qa-field">
-        <label for="q-format" class="qa-label">1) What is the format of the launch event?</label>
-        <textarea id="q-format" placeholder="e.g., Panel, Fireside chat, Press conference…"></textarea>
+        <label for="q-format" class="qa-label">1) Any additional comments the comms team should be aware of?</label>
+        <textarea id="q-format" placeholder=""></textarea>
       </div>
 
-      <div class="qa-field">
-        <label for="q-partners" class="qa-label">2) Are there partners we should reach out to for comms collaborations?</label>
-        <div class="qa-hint">CSOs, Youth Leaders, Champions — add names, orgs, roles, and any intros we should request.</div>
-        <textarea id="q-partners" placeholder="e.g., Save the Children DK (press), Youth Leader X (speech), Champion Y (quote)…"></textarea>
-      </div>
+
     </div>
   </section>
 
   <footer>
-    <button id="export-json">Export JSON</button>
-    <button id="export-csv">Export CSV</button>
     <button id="clear-all">Clear List</button>
     <button id="email-outlook-desktop">Email (Outlook app)</button>
     <button id="email-outlook-web">Email (Outlook Web)</button>
@@ -849,7 +843,6 @@ function textBody(st){
       L.push(`• ${r.name}  |  ${r.lang}  |  Qty: ${r.qty}`);
     });
   }
-  L.push("", "CSV available via Export if needed.");
   return L.join("\n");
 }
 function openMailto(to, subject, body){

@@ -754,6 +754,16 @@ const tbody = document.getElementById('tbody');
 const tableWrap = document.getElementById('table-wrap');
 const countPill = document.getElementById('count-pill');
 
+function esc(s){
+  return String(s ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+
 function drawTable(){
   tbody.innerHTML="";
   state.selected.forEach((r,i)=>{

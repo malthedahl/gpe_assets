@@ -5,23 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>One Stop Shop Multiply Possibility Assets</title>
 <style>
-  :root { 
-    --fg:#18181b; 
-    --muted:#71717a; 
-    --line:#e4e4e7; 
-    --bg:#fafafa; 
-    --accent:#3b82f6; 
-    --soft:#f4f4f5; 
-    --card:#ffffff;
-  }
+:root { 
+  --fg: #1a1a1a;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --bg: #fafafa;
+  --card: #ffffff;
+
+  --blue: #BAB3FF;  /* GPE Blue */
+  --green: #43D596; /* GPE Green */
+}
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { 
-    font:15px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif; 
-    color:var(--fg); 
-    background:var(--bg); 
-    -webkit-font-smoothing: antialiased;
-  }
-  
+  body {
+  font:15px/1.6 -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;
+  color: var(--fg);
+  background: rgba(186, 179, 255, 0.55);
+}
   header { 
     padding:24px 32px; 
     background:var(--card);
@@ -71,12 +71,13 @@
   
 
   /* Country section */
-  .country-card, .questionnaire, .picker, .grid { 
-    border:1px solid var(--line); 
-    border-radius:16px; 
-    background:var(--card);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-  }
+  .country-card, .picker, .questionnaire, .grid {
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  box-shadow: 0 2px 4px rgba(6,33,114,0.08);
+}
+
   .country-card { padding:24px; margin-top:24px; }
   .country-row { 
     display:grid; 
@@ -251,8 +252,10 @@
 </head>
 <body>
 <header>
-  <h1>Campaign Assets</h1>
+  <img src="https://github.com/malthedahl/gpe_assets/blob/main/GPE_logo_with_tagline_horizontal_RGB_EN_2023.png?raw=true" alt="Logo 1" style="height:46px; margin-left: 210px">
+  <h1 style="margin-left:25px">Campaign Assets</h1>
   <span class="pill" id="count-pill">0 selected</span>
+  <img src="https://github.com/malthedahl/gpe_assets/blob/main/GPE%20MP%20logo_EN%20positiv.png?raw=true" alt="Logo 2" style="height:46px; margin-left:530px">
 </header>
 
 <!-- Top catalog -->

@@ -103,7 +103,7 @@
           fill="currentColor"
           class="octo-body"
         ></path></svg>
-    ></a>
+    </a>
     <main>
       <nav>
         <a href="https://github.com/russellgoldenberg/scrollama"
@@ -151,8 +151,9 @@
           </div>
         </article>
 
-        <figure>
+        <figure class="sticky">
           <p>0</p>
+          <svg id="totalChart" width="800" height="300"></svg>
         </figure>
       </section>
 
@@ -171,6 +172,40 @@
       var figure = scrolly.select("figure");
       var article = scrolly.select("article");
       var step = article.selectAll(".step");
+      const totalChildren = 378_200_000;
+
+      d3.json("donors.json").then(data => {
+        data.forEach(d => {
+            d.children = totalChildren * d.share;
+        });
+        drawTotalChart(data);
+        });
+
+        function drawTotalChart(data) {
+        const svg = d3.select("#totalChart");
+        const width = +svg.attr("width");
+        const height = +svg.attr("height");
+        
+        const x = d3.scaleLinear()
+            .domain([0, 1])
+            .range([0, width]);
+
+        let cumulative = 0;
+        svg.selectAll("rect")
+            .data(data.sort((a,b)=>b.share - a.share))
+            .join("rect")
+            .attr("x", d => {
+            const x0 = x(cumulative);
+            cumulative += d.share;
+            return x0;
+            })
+            .attr("width", d => x(d.share))
+            .attr("height", height/2)
+            .attr("y", height/4)
+            .attr("fill", (d,i)=>d3.schemeTableau10[i % 10])
+            .append("title")
+            .text(d => `${d.country}: ${(d.share*100).toFixed(2)}%`);
+        }
 
       // initialize the scrollama
       var scroller = scrollama();

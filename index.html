@@ -255,7 +255,6 @@
 <header>
   <img src="https://github.com/malthedahl/gpe_assets/blob/main/GPE_logo_with_tagline_horizontal_RGB_EN_2023.png?raw=true" alt="Logo 1" style="height:46px; margin-left: 210px">
   <h1 style="margin-left:25px">Campaign Assets</h1>
-  <span class="pill" id="count-pill">0 selected</span>
   <img src="https://github.com/malthedahl/gpe_assets/blob/main/GPE%20MP%20logo_EN%20positiv.png?raw=true" alt="Logo 2" style="height:46px; margin-left:530px">
 </header>
 
@@ -271,10 +270,12 @@
       <select id="country-select" aria-label="Country"></select>
       <div class="muted" id="country-status"></div>
     </div>
-    <div class="country-info">
+    <div class="country-info" style="margin-top:12px">
       <div class="box">
-        <h3>Tailored CFI</h3>
-        <div class="box-value" id="need-cfi">—</div>
+        <h3>Fulfilled from</h3>
+        <div class="box-value">
+          <select id="office-select" aria-label="Fulfilled from"></select>
+        </div>
       </div>
       <div class="box">
         <h3>Delegation</h3>
@@ -285,6 +286,7 @@
         <div class="box-value" id="date-box">—</div>
       </div>
     </div>
+    
   </section>
 
   <!-- Five fixed rows -->
@@ -332,6 +334,8 @@
 
 <script>
 /* ========= Country data ========= */
+
+let OFFICES =["DC", "Paris", "Brussels", "Nairobi"]
 const COUNTRIES = [
   c("Australia","Yes",{
     status:"Drafting",
@@ -555,9 +559,17 @@ function c(name, need, extra={}) {
     team: extra.team || ""
   };
 }
+function rebuildRows(){
+  const rowsHost = document.getElementById('rows');
+  rowsHost.innerHTML = "";
+  for (const cat of CATS) rowsHost.appendChild(makeRow(cat, DATA[cat]||[]));
+}
+
 
 /* ========= Asset data ========= */
-const CATS = ["Messaging","Print on demand","Video assets","Digital Assets","Campaign branding", "Press"];
+const CATS = ["Messaging","Print on demand","Press", "Swag"]; // for picker
+const ALL_CATS = ["Messaging","Print on demand","Video assets","Digital Assets","Campaign branding","Press"]; // for catalog
+
 const DATA = {
   "Messaging": [
     item("Tailored Case for Investment",{pod:true}),
@@ -621,6 +633,7 @@ const DATA = {
     item("Hero Visual", {langs:["EN, FR, SPA, PO, ITA, AR"], href:"https://worldbankgroup.sharepoint.com/teams/GPEFinancingCampaign2026-WBGroup/Shared%20Documents/Forms/AllItems.aspx?csf=1&web=1&e=rsBsop&CID=e3e7b6c9%2D074b%2D4c13%2D8d84%2Dd8457ee0b965&FolderCTID=0x0120007A939FC2FD17254BB775039F422EBDE5&id=%2Fteams%2FGPEFinancingCampaign2026%2DWBGroup%2FShared%20Documents%2FCAMPAIGN%20COMMUNICATIONS%2FCREATIVE%20CAMPAIGN%2FBlossom%20deliverables%2FCampaign%20brand%20book%2FHero%20Visual"})
   ],
 
+
   "Press": [
     item("Press kits"),
     item("Press Release"),
@@ -644,7 +657,7 @@ function item(name, extra = {}) {
 function buildCatalog(){
   const catHost = document.getElementById("catalog");
   catHost.innerHTML = "";
-  for (const cat of CATS){
+  for (const cat of ALL_CATS){
     const col = document.createElement("div");
     col.className = "cat-col";
     const title = document.createElement("div");
@@ -679,7 +692,6 @@ const state = { selected: [], country: null };
 
 /* ========= Country UI ========= */
 const countrySelect = document.getElementById('country-select');
-const needBox = document.getElementById('need-cfi');
 const delegationBox = document.getElementById('delegation-box');
 const dateBox = document.getElementById('date-box');
 const statusLine = document.getElementById('country-status');
@@ -693,8 +705,7 @@ if (countrySelect.options.length) applyCountry(countrySelect.options[0].value);
 function applyCountry(name){
   const c = COUNTRIES.find(x=>x.name===name);
   state.country = c || null;
-  needBox.textContent = c ? (c.needTailored ? "YES" : "NO") : "—";
-  
+
   let date = c?.date || "—";
   let delegation = "—";
   const match = date.match(/(.*?)\s*\((.*?)\)/);
@@ -702,16 +713,16 @@ function applyCountry(name){
     date = match[1].trim();
     delegation = match[2].trim();
   }
-  
   dateBox.textContent = date;
   delegationBox.textContent = delegation;
 
   statusLine.textContent = c ? (c.focal ? `Focal: ${c.focal}` : "") : "";
 }
 
+
 /* ========= 5 rows ========= */
 const rowsHost = document.getElementById('rows');
-for (const cat of CATS) rowsHost.appendChild(makeRow(cat, DATA[cat]||[]));
+rebuildRows()
 
 function makeRow(category, items){
   const wrap = document.createElement('div'); wrap.className='row';
@@ -772,7 +783,7 @@ document.getElementById('open-form').onclick = ()=> window.open(FORM_URL, '_blan
 /* ========= Selected table ========= */
 const tbody = document.getElementById('tbody');
 const tableWrap = document.getElementById('table-wrap');
-const countPill = document.getElementById('count-pill');
+
 
 function esc(s){
   return String(s ?? "")
@@ -798,7 +809,9 @@ function drawTable(){
     tbody.appendChild(tr);
   });
   tableWrap.hidden = state.selected.length===0;
-  countPill.textContent = `${state.selected.length} selected`;
+  const pill = document.getElementById('count-pill');
+  if (pill) pill.textContent = `${state.selected.length} selected`;
+
 }
 window.removeRow = (i)=>{ state.selected.splice(i,1); drawTable(); };
 
@@ -867,6 +880,9 @@ function openMailto(to, subject, body){
 // CSV parser + load CSV
 // ---- Config: published CSV URL from your Sheet
 const RESPONSES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTo_gDYZ3bPdf0XQMN6ATOVyj3i6YNLpTkvGrfXOIANITVR9ZdzKYIgIDdT0ZmcHdrGpfh9mJ9sHUtK/pub?gid=2131640777&single=true&output=csv";
+const SWAG_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS6zZRRMC3VMviE9FxTVxxhMdsclMAP2jJlINUy0_EEGWmJCyr1wEFAbKZZtQyoNQTK72ZArEIh8wso/pub?output=csv";
+
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS6zZRRMC3VMviE9FxTVxxhMdsclMAP2jJlINUy0_EEGWmJCyr1wEFAbKZZtQyoNQTK72ZArEIh8wso/pub?output=csv";
 
 // Minimal CSV parser (handles quoted fields)
 function parseCSV(text){
@@ -908,7 +924,8 @@ function normalizeCategory(s){
     "video assets":"Video assets",
     "digital assets":"Digital Assets",
     "campaign branding":"Campaign branding",
-    "press":"Press"
+    "press":"Press",
+    "swag":"Swag"
   };
   return map[t] || null;
 }
@@ -976,12 +993,88 @@ async function loadSubmissions(){
       DATA[cat] = DATA[cat] || [];
       dedupeInto(DATA[cat], item(obj.name, obj));
     }
-
+    rebuildRows();
     buildCatalog();
   }catch(e){ console.error(e); }
 }
 
+async function loadSwag(){
+  try{
+    const res = await fetch(SWAG_CSV_URL, {cache:"no-store"});
+    if(!res.ok) return;
+    const text = await res.text();
+    const rows = parseCSV(text);
+    if(rows.length<2) return;
+
+    const header = rows[0].map(h=>h.trim().toLowerCase());
+    const nameIdx = header.findIndex(h=>h==="name" || h==="item");
+    if(nameIdx===-1) return;
+
+    DATA["Swag"] = [];
+    for(let i=1;i<rows.length;i++){
+      const name = rows[i][nameIdx]?.trim();
+      if(!name) continue;
+      DATA["Swag"].push(item(name));
+    }
+    rebuildRows();
+    buildCatalog();
+  }catch(e){ console.error(e); }
+}
+
+loadSwag();
 loadSubmissions();
+
+// update orderItem to carry orderId (idempotency)
+async function orderItem(name, qty, office, orderId) {
+  const url = "https://script.google.com/macros/s/AKfycbyfE4YLmREJQxx3jjHa_CRxQ0RP6MRurqL26D8oceVZRcfTz_mY0hJiy_sFHRh_DfER/exec";
+  const payload = { name, qty, office, orderId };
+  try {
+    const res = await fetch(url, { method: "POST", body: JSON.stringify(payload) });
+    return await res.text();
+  } catch (e) {
+    return `Failed ${name}: ${e.message}`;
+  }
+}
+
+async function placeSwagOrderIfNeeded() {
+  const swag = state.selected.filter(r => r.category === "Swag");
+  if (!swag.length) return { ok: true, messages: [] };
+
+  state.pendingOrderId ||= crypto.randomUUID();  // idempotent per send
+  const orderId = state.pendingOrderId;
+  const office = document.getElementById("office-select")?.value || "";
+
+  if (!confirm(`Submit swag order from ${office} (${swag.length} line(s)) and open email?`)) {
+    return { ok: false, cancelled: true };
+  }
+
+  const results = [];
+  for (const r of swag) {
+    const qty = Math.max(1, Number(r.qty) | 0);
+    results.push(await orderItem(r.name, qty, office, orderId));
+  }
+  alert(results.join("\n"));
+  setTimeout(loadInventory, 1500);
+  return { ok: true, messages: results };
+}
+loadInventory();
+
+
+// hook both email buttons (keep your existing subject/body code)
+document.getElementById('email-outlook-desktop').onclick = async () => {
+  const placed = await placeSwagOrderIfNeeded();
+  if (placed.cancelled) return;
+  const body = textBody(state);
+  openMailto(DEFAULT_TO, subjectLine(), body);
+};
+
+document.getElementById('email-outlook-web').onclick = async () => {
+  const placed = await placeSwagOrderIfNeeded();
+  if (placed.cancelled) return;
+  const body = textBody(state);
+  openOutlookWeb(DEFAULT_TO, subjectLine(), body);
+};
+
 
 
 function openOutlookWeb(to, subject, body){
@@ -998,15 +1091,110 @@ function openOutlookWeb(to, subject, body){
 const subjectLine = () =>
   `Campaign Assets – ${state.country?.name||"No country"} (${new Date().toLocaleString()})`;
 
-document.getElementById('email-outlook-desktop').onclick = () => {
-  const body = textBody(state);
-  openMailto(DEFAULT_TO, subjectLine(), body);
-};
+// global holder
 
-document.getElementById('email-outlook-web').onclick = () => {
-  const body = textBody(state);
-  openOutlookWeb(DEFAULT_TO, subjectLine(), body);
-};
+async function loadInventory() {
+  const res = await fetch(SHEET_URL, { cache: "no-store" });
+  if (!res.ok) return;
+
+  const csv = await res.text();
+  const rows = csv.trim().split(/\r?\n/).map(r => r.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/));
+  if (!rows.length) return;
+
+  // header row from sheet
+  const headerRaw = rows[0];
+  const itemHeader = (headerRaw[0] || "Item").trim();
+
+  // derive office names from "Quantity - X" headers
+  OFFICES = headerRaw.slice(1).map(h => {
+    const m = String(h || "").match(/quantity\s*-\s*(.+)/i);
+    return (m ? m[1] : h).trim();
+  });
+
+  // populate the "Fulfilled from" picker if present
+  const officeSel = document.getElementById("office-select");
+  if (officeSel) {
+    officeSel.innerHTML = "";
+    OFFICES.forEach(o => {
+      const opt = document.createElement("option");
+      opt.value = o; opt.textContent = o;
+      officeSel.appendChild(opt);
+    });
+    if (OFFICES.length) officeSel.value = OFFICES[0];
+  }
+
+  // build table
+  const table = document.createElement("table");
+  table.style.width = "100%";
+  table.style.borderCollapse = "collapse";
+
+  // header row: Item + one th per office with original header text
+  const thead = document.createElement("thead");
+  const trHead = document.createElement("tr");
+
+  const thItem = document.createElement("th");
+  thItem.textContent = itemHeader;
+  trHead.appendChild(thItem);
+
+  headerRaw.slice(1).forEach(h => {
+    const th = document.createElement("th");
+    th.textContent = h || "";
+    th.className = "right";
+    trHead.appendChild(th);
+  });
+
+  thead.appendChild(trHead);
+  table.appendChild(thead);
+
+  // body rows
+  const tbody = document.createElement("tbody");
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r || !r.length) continue;
+
+    const tr = document.createElement("tr");
+
+    const tdName = document.createElement("td");
+    tdName.textContent = r[0] || "";
+    tr.appendChild(tdName);
+
+    for (let c = 1; c < headerRaw.length; c++) {
+      const td = document.createElement("td");
+      td.textContent = (r[c] ?? "").toString();
+      td.className = "right";
+      tr.appendChild(td);
+    }
+
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+
+  // styling
+  table.querySelectorAll("th,td").forEach(td => {
+    td.style.borderBottom = "1px solid var(--line)";
+    td.style.padding = "8px 12px";
+    td.style.fontSize = "14px";
+  });
+
+  // wrap in .grid and inject at top of <main>
+  const wrap = document.createElement("div");
+  wrap.className = "grid";
+
+  // optional caption
+  const caption = document.createElement("div");
+  caption.style.padding = "14px 16px 0 16px";
+  caption.style.fontWeight = "600";
+  caption.style.color = "var(--muted)";
+  caption.style.textTransform = "uppercase";
+  caption.style.letterSpacing = ".03em";
+  caption.textContent = "Swag quantities available in country offices";
+  wrap.appendChild(caption);
+
+  wrap.appendChild(table);
+
+  const main = document.querySelector("main");
+  if (main) main.prepend(wrap);
+}
 
 
 
